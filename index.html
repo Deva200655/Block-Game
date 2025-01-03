@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catch the Circles Game</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: black;
+            color: white;
+            height: 100vh;
+        }
+
+        #gameCanvas {
+            display: block;
+            margin: 20px auto;
+        }
+
+        .btn-play-again {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 18px;
+        }
+
+        .btn-play-again:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <header class="bg-dark text-white py-3 text-center w-100">
+        <h1>Catch the Circles Game</h1>
+        <p>Click on the circles to score points!</p>
+    </header>
+
+    <main class="container text-center">
+        <div id="gameCanvas"></div>
+        <div id="playAgainButton" style="display: none;">
+            <button class="btn-play-again">Play Again</button>
+        </div>
+    </main>
+
+    <footer class="bg-dark text-white py-2 text-center w-100">
+        <small>© 2025 Your Game Studio</small>
+    </footer>
+
+    <script>
+        let circles = [];
+        const NUM_CIRCLES = 10;
+        const CIRCLE_RADIUS = 30;
+        let score = 0;
+        let gameOver = false;
+
+        function setup() {
+            let canvas = createCanvas(800, 600);
+            canvas.parent('gameCanvas');
+            resetGame();
+        }
+
+        function draw() {
+            background(0);
+            if (!gameOver) {
+                drawCircles();
+                displayScore();
+            } else {
+                displayWinMessage();
+            }
+        }
+
+        function drawCircles() {
+            for (let circle of circles) {
+                circle.x += circle.dx;
+                circle.y += circle.dy;
+
+                if (circle.x - CIRCLE_RADIUS <= 0 || circle.x + CIRCLE_RADIUS >= width) {
+                    circle.dx *= -1;
+                }
+                if (circle.y - CIRCLE_RADIUS <= 0 || circle.y + CIRCLE_RADIUS >= height) {
+                    circle.dy *= -1;
+                }
+
+                fill(255, 0, 0);
+                noStroke();
+                ellipse(circle.x, circle.y, CIRCLE_RADIUS * 2);
+            }
+        }
+
+        function displayScore() {
+            fill(255);
+            textSize(24);
+            text(`Score: ${score}`, 10, 30);
+        }
+
+        function displayWinMessage() {
+            fill(255);
+            textSize(36);
+            textAlign(CENTER);
+            text("You Win!", width / 2, height / 2 - 20);
+            document.getElementById('playAgainButton').style.display = 'block';
+        }
+
+        document.querySelector('.btn-play-again').addEventListener('click', () => {
+            document.getElementById('playAgainButton').style.display = 'none';
+            resetGame();
+        });
+
+        function mousePressed() {
+            if (gameOver) return;
+
+            for (let i = circles.length - 1; i >= 0; i--) {
+                let circle = circles[i];
+                let distance = dist(mouseX, mouseY, circle.x, circle.y);
+                if (distance <= CIRCLE_RADIUS) {
+                    circles.splice(i, 1);
+                    score++;
+                    break;
+                }
+            }
+
+            if (circles.length === 0) {
+                gameOver = true;
+            }
+        }
+
+        function resetGame() {
+            score = 0;
+            gameOver = false;
+            circles = [];
+            for (let i = 0; i < NUM_CIRCLES; i++) {
+                circles.push({
+                    x: random(CIRCLE_RADIUS, width - CIRCLE_RADIUS),
+                    y: random(CIRCLE_RADIUS, height - CIRCLE_RADIUS),
+                    dx: random([-4, 4]),
+                    dy: random([-4, 4]),
+                });
+            }
+        }
+    </script>
+</body>
+</html>
